@@ -16,7 +16,7 @@ RUN curl -fsSL https://bun.sh/install | bash \
 ENV PATH="/opt/bun/bin:${PATH}"
 
 # Copy package manifests to install dependencies
-COPY package*.json ./
+COPY packages/openmemory-js/package*.json ./
 
 # Install all dependencies (including devDependencies) using Bun
 # --frozen-lockfile ensures reproducible builds
@@ -24,8 +24,8 @@ COPY package*.json ./
 RUN bun install --frozen-lockfile
 
 # Copy source code and build the application
-COPY src/ ./src/
-COPY tsconfig.json ./
+COPY packages/openmemory-js/src/ ./src/
+COPY packages/openmemory-js/tsconfig.json ./
 RUN bun run build
 
 # Remove devDependencies to reduce image size
