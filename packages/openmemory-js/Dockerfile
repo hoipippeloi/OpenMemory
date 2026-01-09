@@ -28,7 +28,7 @@ COPY src/ ./src/
 COPY tsconfig.json ./
 RUN bun run build
 
-# Remove devDependencies to reduce image size 
+# Remove devDependencies to reduce image size
 # (Removing all the devDependencies that we dont need in the final build)
 RUN npm prune --omit=dev
 
@@ -48,7 +48,7 @@ RUN addgroup -g 1001 -S appgroup \
 # Copy only production artifacts from the builder stage
 COPY --from=builder /app/node_modules ./node_modules/
 COPY --from=builder /app/dist ./dist/
-COPY package.json ./
+COPY --from=builder /app/package.json ./
 
 # Create a directory for persistent data and secure file permissions
 RUN mkdir -p /data \
