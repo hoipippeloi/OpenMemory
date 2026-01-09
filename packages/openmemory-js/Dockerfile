@@ -38,8 +38,8 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Install timezone data for proper TZ support
-RUN apk add --no-cache tzdata
+# Install timezone data and su-exec for running as non-root user
+RUN apk add --no-cache tzdata su-exec
 
 # Create a dedicated non-root user for security
 RUN addgroup -g 1001 -S appgroup \
@@ -55,8 +55,12 @@ RUN mkdir -p /app/data \
   && chown -R appuser:appgroup /app/data /app \
   && chmod -R go-w /app
 
-# Switch to non-root user
-USER appuser
+# Copy entrypoint script to fix permissions at runtime
+COPY packages/openmemory-js/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Run as root - entrypoint will switch to appuser
+# USER appuser (commented out, we use entrypoint instead)
 
 # Expose the application port
 EXPOSE 8080
@@ -65,5 +69,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD node -e "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
-# Start the application using npm
-ENTRYPOINT ["npm", "start"]
+# Start the application using entrypoint script
+ENTRYPOINT ["docker-entrypoint.sh", "npm", "start"]
