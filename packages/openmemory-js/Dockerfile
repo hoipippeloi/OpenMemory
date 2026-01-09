@@ -51,9 +51,9 @@ COPY --from=builder /app/dist ./dist/
 COPY --from=builder /app/package.json ./
 
 # Create a directory for persistent data and secure file permissions
-RUN mkdir -p /data \
- && chown -R appuser:appgroup /data /app \
- && chmod -R go-w /app
+RUN mkdir -p /app/data \
+  && chown -R appuser:appgroup /app/data /app \
+  && chmod -R go-w /app
 
 # Switch to non-root user
 USER appuser
